@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "model-modifier",
+  "version": "${version}",
+  "name": "model-modifier",
+  "description": "i love dragon warrior pee",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/modelmodifier/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.scale.modelModifier.Main"
+    ]
+  },
+  "mixins": [
+    "model-modifier.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

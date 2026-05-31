@@ -1,0 +1,27 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.scale.modelModifier.mixins",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+  ],
+  "client": [
+    "antibot.AntiBotAccessorMixin",
+    "CommandMixin",
+    "modelmodifier.HideArmorMixin",
+    "modelmodifier.HideCapeMixin",
+    "modelmodifier.HideWeirdHelmetsMixin",
+    "modelmodifier.MoveHeldItemMixin",
+    "modelmodifier.OverwritePlayerModelMixin",
+    "modelmodifier.OverwriteRenderCuboid",
+    "antibot.ResetAntibotMixin",
+    "antibot.TickAntibotMixin",
+    "modelmodifier.TrackCurrentlyRenderingEntity"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

@@ -10,7 +10,7 @@ I'll write a cool readme later cause i like this project quite a bit
 - Works with all minecraft effects, such as glowing and invisibility
 - Works with minecraft smooth lighting and shading packs
 - Only renders armour that doesn't look weird on 3d models, such as helmets and elytra
-- You can create your own models via a texture pack [example packs](https://github.com/scoliossis/model-modifier/example-resource-pack)
+- You can create your own models via a texture pack [example packs](https://github.com/scoliossis/model-modifier/tree/master/example-resource-pack)
 - The models are only rendered on real players and not on server bots
 ![img_1.png](repo/glowing%20and%20items.png)
 

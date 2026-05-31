@@ -1,4 +1,4 @@
-# Model Modifier
+# Model Modifier for Minecraft Fabric 1.21.11
 I'll write a cool readme later cause i like this project quite a bit
 
 ## Rayman:

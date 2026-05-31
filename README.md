@@ -1,10 +1,7 @@
 # Model Modifier for Minecraft Fabric 1.21.11
 I'll write a cool readme later cause i like this project quite a bit
 
-## Rayman:
-![rayman.png](repo/rayman.png)
-## Triple T:
-![tttsahur.png](repo/tttsahur.png)
+## Example Video: https://youtu.be/nQAgm74q6ck
 
 ### Features:
 - Works with all minecraft effects, such as glowing and invisibility

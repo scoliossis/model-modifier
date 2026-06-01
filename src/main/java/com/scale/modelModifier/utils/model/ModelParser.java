@@ -1,18 +1,68 @@
 package com.scale.modelModifier.utils.model;
 
 import com.scale.modelModifier.Main;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
 
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-// code from an old project i made
-// slightly modified to be specific for minecraft models
+// code from an old project i made, slightly modified to have extra swag
 public class ModelParser {
-    public static HashMap<String, ArrayList<ModelFace>> getModelFaces(Identifier identifier) {
+    public static Model getModel(String entityKey) {
+        if (!Main.isModelPresent(entityKey)) return null;
+
+        try {
+            // todo: make "helditemoffset.txt" and "scale.txt" a single json
+            Vec3d offsetVec = Vec3d.ZERO;
+            Optional<Resource> heldItemOffset = Main.getEntityResource(entityKey, "helditemoffset.txt");
+            if (heldItemOffset.isPresent()) offsetVec = parseVec3dFromLine(heldItemOffset.get().getReader().readLine());
+
+            Vec3d scaleVec = new Vec3d(1, 1, 1);
+            Optional<Resource> scale = Main.getEntityResource(entityKey, "scale.txt");
+            if (scale.isPresent()) scaleVec = parseVec3dFromLine(scale.get().getReader().readLine());
+
+
+            HashMap<String, ArrayList<ModelFace>> modelFaces = getModelFaces(entityKey);
+            Vector3f dimensions = getDimensions(modelFaces);
+
+            Vec3d scaleMultiplier = new Vec3d(scaleVec.x/dimensions.x, scaleVec.y/dimensions.y, scaleVec.z/dimensions.z);
+
+            for (ArrayList<ModelFace> modelFaceList : modelFaces.values()) {
+                for (ModelFace modelFace : modelFaceList) {
+                    modelFace.triangle = modelFace.triangle.multiply(scaleMultiplier);
+                }
+            }
+
+            return new Model(
+                    modelFaces,
+                    Main.getEntityIdentifier(entityKey, "texturemap.png"),
+                    offsetVec
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static Vec3d parseVec3dFromLine(String line) {
+        return new Vec3d(
+                Double.parseDouble(line.split(",")[0]),
+                Double.parseDouble(line.split(",")[1]),
+                Double.parseDouble(line.split(",")[2])
+        );
+    }
+
+    private static HashMap<String, ArrayList<ModelFace>> getModelFaces(String entityKey) {
         try {
             HashMap<String, ArrayList<ModelFace>> modelFaces = new HashMap<>();
 
@@ -20,7 +70,7 @@ public class ModelParser {
             ArrayList<Vector3f> normals = new ArrayList<>();
             ArrayList<Vector3f> textureCoordinates = new ArrayList<>();
 
-            BufferedReader fileReader = Main.getResource(identifier.getPath()).get().getReader();
+            BufferedReader fileReader = Main.getEntityResource(entityKey, "model.obj").get().getReader();
 
             String modelPartName = "";
             // in case u have a obj with NO names
@@ -60,29 +110,34 @@ public class ModelParser {
                 }
             }
 
-            // wow this is a great looking variable :sob: it just gets the highest y of the model
-            float maxY = modelFaces.values()
-                    .stream()
-                    .flatMap(List::stream)
-                    .map(face -> face.triangle.getMax().y)
-                    .max(Float::compare)
-                    .orElse(0f);
-
-            System.out.println("maxY: " + maxY);
-            // the model should be 2 blocks high!
-            float scale = 2 / maxY;
-            // so we make EVERYTHING that scale
-            for (ArrayList<ModelFace> modelFaceArrayList : modelFaces.values()) {
-                for (ModelFace modelFace : modelFaceArrayList) {
-                    modelFace.triangle = modelFace.triangle.multiply(new Vector3f(scale, scale, scale));
-                }
-            }
-
             return modelFaces;
         } catch (Exception e) {
             e.printStackTrace();
             return new HashMap<>();
         }
+    }
+
+    private static Vector3f getDimensions(HashMap<String, ArrayList<ModelFace>> modelFaces) {
+        return new Vector3f(
+                getMaxFromAxis(modelFaces, Direction.Axis.X) - getMinFromAxis(modelFaces, Direction.Axis.X),
+                getMaxFromAxis(modelFaces, Direction.Axis.Y) - getMinFromAxis(modelFaces, Direction.Axis.Y),
+                getMaxFromAxis(modelFaces, Direction.Axis.Z) - getMinFromAxis(modelFaces, Direction.Axis.Z)
+        );
+    }
+
+    private static Stream<Float> flatMapModelFacesAxis(HashMap<String, ArrayList<ModelFace>> modelFaces, Direction.Axis axis) {
+        return modelFaces.values()
+                .stream()
+                .flatMap(List::stream)
+                .map(face -> face.triangle.getMax(axis));
+    }
+
+    private static float getMinFromAxis(HashMap<String, ArrayList<ModelFace>> modelFaces, Direction.Axis axis) {
+        return flatMapModelFacesAxis(modelFaces, axis).min(Float::compare).orElse(0f);
+    }
+
+    private static float getMaxFromAxis(HashMap<String, ArrayList<ModelFace>> modelFaces, Direction.Axis axis) {
+        return flatMapModelFacesAxis(modelFaces, axis).max(Float::compare).orElse(0f);
     }
 
     private static Vector3f parseVector3fFromLine(String[] lineSplit) {

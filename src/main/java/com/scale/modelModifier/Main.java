@@ -1,26 +1,32 @@
 package com.scale.modelModifier;
 
+import com.scale.modelModifier.mixins.modelmodifier.ChildPartMapAccessor;
+import com.scale.modelModifier.utils.antibot.TargetUtil;
+import com.scale.modelModifier.utils.model.LivingEntityInfo;
 import com.scale.modelModifier.utils.model.Model;
-import com.scale.modelModifier.utils.model.ModelPartName;
+import com.scale.modelModifier.utils.model.ModelParser;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.entity.state.EntityRenderState;
+import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.resource.Resource;
+import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.ResourceType;
+import net.minecraft.util.Arm;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Optional;
 
+// todo: everything is a mess, comments are MISSING its all gone wrong.
 public class Main implements ModInitializer {
-    public static final File CONFIG_FILE = new File("modelmodifier/enabled.json");
-
     public static ClientPlayerEntity p() {
         return MinecraftClient.getInstance().player;
     }
@@ -28,50 +34,88 @@ public class Main implements ModInitializer {
         return MinecraftClient.getInstance().world;
     }
 
-    public static final HashMap<Integer, ModelPartName> MODEL_PART_NAME_MAP = new HashMap<>();
+    public static LivingEntityInfo lastAccessedModel = null;
 
-    // this should be somewhere else ig.
-    public static boolean isLastPlayerBot = false;
-    public static PlayerEntity currentlyRenderingEntity = null;
-    public static Vec3d heldItemOffsetOverwrite = Vec3d.ZERO;
+    public static final HashMap<String, Model> OVERWRITTEN_MODELS = new HashMap<>();
 
-    public static Model model;
+    public static boolean shouldOverwriteModel() {
+        return lastAccessedModel != null
+                && !lastAccessedModel.isBot();
+    }
 
-    public static boolean isEnabled() {
-        return model != null && !Main.isLastPlayerBot;
+    public static String getModelKey(Class<? extends EntityRenderState> entityRenderState) {
+        return entityRenderState.getSimpleName()
+                .toLowerCase()
+                .replace("renderstate", "")
+                .replace("entity", "");
+    }
+
+    public static Model getModel(EntityRenderState entityRenderState) {
+        return getModel(entityRenderState, null);
+    }
+    public static Model getModel(EntityRenderState entityRenderState, ModelPart rootModel) {
+        lastAccessedModel = null;
+
+        String entityKey = getModelKey(entityRenderState.getClass());
+
+        Model model = TargetUtil.isBot(entityRenderState) ? null : getModel(entityKey);
+        if (model == null) return null;
+
+        ModelPart rootPart = rootModel == null && lastAccessedModel != null ? lastAccessedModel.rootPart() : rootModel;
+
+        boolean isHoldingItem = false;
+        if (entityRenderState instanceof PlayerEntityRenderState playerEntityRenderState) {
+            Entity entity = w().getEntityById(playerEntityRenderState.id);
+            if (entity instanceof LivingEntity livingEntity) isHoldingItem = !livingEntity.getStackInArm(Arm.RIGHT).isEmpty();
+        }
+
+        lastAccessedModel = new LivingEntityInfo(
+                OVERWRITTEN_MODELS.get(entityKey),
+                rootPart,
+                rootPart == null ? null : ((ChildPartMapAccessor) (Object)rootPart).getChildren(),
+                TargetUtil.isBot(entityRenderState),
+                isHoldingItem
+        );
+        return model;
+    }
+
+    public static Model getModel(String entityKey) {
+        if (!OVERWRITTEN_MODELS.containsKey(entityKey)) {
+            Model model = ModelParser.getModel(entityKey);
+            OVERWRITTEN_MODELS.put(entityKey, model);
+        }
+        return OVERWRITTEN_MODELS.get(entityKey);
     }
 
     @Override
     public void onInitialize() {
-        // fabric event bus, how cool, we gotta load the model here otherwise mc.getResourceManager() is null
-        ClientLifecycleEvents.CLIENT_STARTED.register((MinecraftClient minecraft) -> {
-            model = Model.getModel("rayman");
-
-            if (!CONFIG_FILE.exists()) {
-                new File(CONFIG_FILE.getParent()).mkdirs();
-                System.out.println("[Model Modifier] model set to: " + model.name() + " by default.");
+        // deprecated blehhhh
+        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new SimpleSynchronousResourceReloadListener() {
+            @Override
+            public void reload(ResourceManager manager) {
+                OVERWRITTEN_MODELS.clear();
+                System.out.println("[Model Modifier] we gotta recheck all the models now. take a good second to think about what you've done.");
             }
-            else {
-                try {
-                    model = Model.getModel(Files.readString(CONFIG_FILE.toPath()));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+
+            @Override
+            public Identifier getFabricId() {
+                return Identifier.of("modelmodifier", "whydoigottachooseanameforthis");
             }
         });
     }
 
-    public static Optional<Resource> getResource(String identifierName) {
-        return MinecraftClient.getInstance().getResourceManager().getResource(Identifier.of("modelmodifier", identifierName));
+    public static Identifier getEntityIdentifier(String key, String resource) {
+        return Identifier.of("modelmodifier", key+"/"+resource);
     }
 
-    public static boolean isModelPresent(String modelName) {
-        return getResource(modelName+"/model.obj").isPresent()
-                && getResource(modelName+"/texturemap.png").isPresent()
-                && getResource(modelName+"/helditemoffset.txt").isPresent();
+    public static Optional<Resource> getEntityResource(String key, String resource) {
+        return MinecraftClient.getInstance().getResourceManager().getResource(getEntityIdentifier(key, resource));
     }
 
-    public static Vec3d getHeldItemOffset() {
-        return heldItemOffsetOverwrite == null ? model.heldItemOffset() : heldItemOffsetOverwrite;
+    public static boolean isModelPresent(String key) {
+        boolean isPresent = getEntityResource(key, "model.obj").isPresent() && getEntityResource(key, "texturemap.png").isPresent();
+
+        System.out.println("[Model Modifier] model for " + key + " has " + (isPresent ? "" : "NOT ") + "been found");
+        return isPresent;
     }
 }

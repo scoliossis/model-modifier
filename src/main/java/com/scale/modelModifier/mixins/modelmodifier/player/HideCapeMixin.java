@@ -1,4 +1,4 @@
-package com.scale.modelModifier.mixins.modelmodifier;
+package com.scale.modelModifier.mixins.modelmodifier.player;
 
 import com.scale.modelModifier.Main;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
@@ -17,6 +17,6 @@ public class HideCapeMixin {
             at = @At("HEAD"),
             cancellable = true)
     public void render(MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, int i, PlayerEntityRenderState playerEntityRenderState, float f, float g, CallbackInfo ci) {
-        if (Main.isEnabled()) ci.cancel();
+        if (Main.shouldOverwriteModel()) ci.cancel();
     }
 }

@@ -1,4 +1,4 @@
-package com.scale.modelModifier.mixins.modelmodifier;
+package com.scale.modelModifier.mixins.modelmodifier.player;
 
 import com.scale.modelModifier.Main;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
@@ -18,7 +18,6 @@ public class HideWeirdHelmetsMixin {
             at = @At("HEAD"),
             cancellable = true)
     public void render(MatrixStack matrices, OrderedRenderCommandQueue queue, int light, EntityRenderState state, float limbAngle, float limbDistance, CallbackInfo ci) {
-        if (state instanceof PlayerEntityRenderState && Main.isEnabled())
-            ci.cancel();
+        if (Main.shouldOverwriteModel()) ci.cancel();
     }
 }

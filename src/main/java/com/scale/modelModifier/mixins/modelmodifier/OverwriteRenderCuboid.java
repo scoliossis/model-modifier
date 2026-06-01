@@ -1,12 +1,18 @@
 package com.scale.modelModifier.mixins.modelmodifier;
 
 import com.scale.modelModifier.Main;
+import com.scale.modelModifier.utils.model.Model;
 import com.scale.modelModifier.utils.model.ModelFace;
-import com.scale.modelModifier.utils.model.ModelPartName;
 import com.scale.modelModifier.utils.model.Triangle;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.entity.model.ChickenEntityModel;
+import net.minecraft.client.render.entity.model.EntityModelPartNames;
+import net.minecraft.client.render.entity.state.EntityRenderState;
+import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.Arm;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,33 +24,42 @@ import java.util.ArrayList;
 
 @Mixin(ModelPart.class)
 public class OverwriteRenderCuboid {
-    @Shadow public float originX;
-    @Shadow public float originY;
-    @Shadow public float originZ;
+    // fancy shadows
+    @Shadow public float originX, originY, originZ;
 
     @Inject(method = "renderCuboids", at = @At("HEAD"), cancellable = true)
     private void onRenderCuboids(MatrixStack.Entry entry, VertexConsumer vertexConsumer, int light, int overlay, int color, CallbackInfo ci) {
-        if (!Main.isEnabled()) return;
+        if (!Main.shouldOverwriteModel()) return;
 
-        ModelPartName modelPartName = Main.MODEL_PART_NAME_MAP.get(this.hashCode());
-        if (modelPartName == null) return;
+        // maybe a bad way to get the model part name, but it works
+        String modelPartName = null;
+        for (String k : Main.lastAccessedModel.modelPartMap().keySet()) {
+            if (Main.lastAccessedModel.modelPartMap().get(k) == (Object) this) {
+                modelPartName = k;
+                break;
+            }
+        }
 
         // we dont wanna see the original part, thats poop
         ci.cancel();
+
+        ArrayList<ModelFace> modelFaces = new ArrayList<>();
+
+        // triple t deserves his own special rendering code methinks
+        if (modelPartName == EntityModelPartNames.RIGHT_ARM && !Main.lastAccessedModel.holdingItem()) {
+            ArrayList<ModelFace> baseHeldItemFaces = Main.lastAccessedModel.model().faces().get("baseitem");
+            if (baseHeldItemFaces != null) modelFaces.addAll(baseHeldItemFaces);
+        }
+
+        // if they didnt put a part here, we just assume thats intentional, and give up
+        modelFaces.addAll(Main.lastAccessedModel.model().faces().getOrDefault(modelPartName, new ArrayList<>()));
+        if (modelFaces.isEmpty()) return;
 
         // .div(16) came to me in a dream (net.minecraft.client.model.ModelPart.Vertex.SCALE_FACTOR)
         Vector3f origin = new Vector3f(this.originX, this.originY, this.originZ).div(16);
 
         // LivingEntityRenderer.render() line 93 does this (according to a comment in my old impl)
         Vector3f offset = new Vector3f(0, -1.501F, 0);
-
-        ArrayList<ModelFace> modelFaces = new ArrayList<>(modelPartName.getFaces());
-
-        // triple t deserves his own special rendering code methinks
-        if (Main.currentlyRenderingEntity.getMainHandStack().isEmpty() && modelPartName.isMainArm(Main.currentlyRenderingEntity)) {
-            ArrayList<ModelFace> baseHeldItemFaces = Main.model.faces().get(ModelPartName.BASE_HELD_ITEM.name);
-            if (baseHeldItemFaces != null) modelFaces.addAll(baseHeldItemFaces);
-        }
 
         // minecraft decided to use quads to draw cuboids, but i want triangles :pensive:
         for (ModelFace modelFace : modelFaces) {

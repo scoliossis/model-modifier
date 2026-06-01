@@ -1,7 +1,6 @@
-package com.scale.modelModifier.mixins.modelmodifier;
+package com.scale.modelModifier.mixins.modelmodifier.player;
 
 import com.scale.modelModifier.Main;
-import com.scale.modelModifier.utils.model.ModelPartName;
 import net.minecraft.client.render.entity.feature.ArmorFeatureRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -12,7 +11,6 @@ import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.state.BipedEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,12 +32,6 @@ public abstract class HideArmorMixin<S extends BipedEntityRenderState, M extends
             cancellable = true
     )
     public void render(MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, int i, S bipedEntityRenderState, float f, float g, CallbackInfo ci) {
-        if (bipedEntityRenderState.entityType != EntityType.PLAYER || !Main.isEnabled()) return;
-
-        // ONLY show the helmet, cause i like it, and only show it if the model has a head
-        if (Main.model.faces().containsKey(ModelPartName.HEAD.name)) {
-            this.renderArmor(matrixStack, orderedRenderCommandQueue, bipedEntityRenderState.equippedHeadStack, EquipmentSlot.HEAD, i, bipedEntityRenderState);
-        }
-        ci.cancel();
+        if (Main.shouldOverwriteModel()) ci.cancel();
     }
 }

@@ -1,6 +1,7 @@
-package com.scale.modelModifier.mixins.modelmodifier;
+package com.scale.modelModifier.mixins.modelmodifier.player;
 
 import com.scale.modelModifier.Main;
+import com.scale.modelModifier.utils.model.Model;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
@@ -31,13 +32,16 @@ public abstract class MoveHeldItemMixin<S extends ArmedEntityRenderState, M exte
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/item/ItemRenderState;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;III)V")
     )
     protected void onRenderItem(ItemRenderState instance, MatrixStack matrices, OrderedRenderCommandQueue orderedRenderCommandQueue, int light, int overlay, int i, S entityState, ItemRenderState itemState, ItemStack stack, Arm arm, MatrixStack matrices2, OrderedRenderCommandQueue queue, int light2) {
-        if (Main.isEnabled()) {
+        Model model = Main.getModel(entityState);
+        boolean shouldOverwriteModel = model != null && Main.lastAccessedModel.model() != null;
+
+        if (shouldOverwriteModel) {
             matrices.push();
-            matrices.translate(Main.model.heldItemOffset().multiply(arm == Arm.LEFT ? -1 : 1, 1, 1));
+            matrices.translate(model.heldItemOffset().multiply(arm == Arm.LEFT ? -1 : 1, 1, 1));
         }
 
         itemState.render(matrices, orderedRenderCommandQueue, light, overlay, i);
 
-        if (Main.isEnabled()) matrices.pop();
+        if (shouldOverwriteModel) matrices.pop();
     }
 }

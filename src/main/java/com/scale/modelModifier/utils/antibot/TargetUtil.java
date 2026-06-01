@@ -2,6 +2,8 @@ package com.scale.modelModifier.utils.antibot;
 
 import com.scale.modelModifier.Main;
 import net.minecraft.client.gui.screen.multiplayer.SocialInteractionsPlayerListWidget;
+import net.minecraft.client.render.entity.state.EntityRenderState;
+import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 
@@ -21,8 +23,12 @@ public class TargetUtil {
         return player.getTeamColorValue() == Main.p().getTeamColorValue();
     }
 
-    public static boolean isBot(Entity target) {
-        if (target == null) return false;
-        return target.getId() != Main.p().getId() && CONSECUTIVE_VALID_PLAYER_TICKS.getOrDefault(target.getUuid(), 0) <= 5;
+    public static boolean isBot(EntityRenderState entityRenderState) {
+        if (!(entityRenderState instanceof PlayerEntityRenderState playerEntityRenderState)) return false;
+        Entity entity = Main.w().getEntityById(playerEntityRenderState.id);
+
+        return entity != null
+                && playerEntityRenderState.id != Main.p().getId()
+                && CONSECUTIVE_VALID_PLAYER_TICKS.getOrDefault(entity.getUuid(), 0) <= 5;
     }
 }

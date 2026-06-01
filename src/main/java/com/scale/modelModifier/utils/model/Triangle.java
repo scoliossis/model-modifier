@@ -1,6 +1,8 @@
 package com.scale.modelModifier.utils.model;
 
 import lombok.AllArgsConstructor;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
 
 // iirc there is a default class for this, but i dont recall the name, and this is stolen from my old project
@@ -14,10 +16,18 @@ public class Triangle {
 
     public Vector3f getMax() {
         return new Vector3f(
-                Math.max(pointA.x, Math.max(pointB.x, pointC.x)),
-                Math.max(pointA.y, Math.max(pointB.y, pointC.y)),
-                Math.max(pointA.z, Math.max(pointB.z, pointC.z))
+                getMax(Direction.Axis.X),
+                getMax(Direction.Axis.Y),
+                getMax(Direction.Axis.Z)
         );
+    }
+
+    public float getMax(Direction.Axis axis) {
+        return switch (axis) {
+            case X -> Math.max(pointA.x, Math.max(pointB.x, pointC.x));
+            case Y -> Math.max(pointA.y, Math.max(pointB.y, pointC.y));
+            case Z -> Math.max(pointA.z, Math.max(pointB.z, pointC.z));
+        };
     }
 
     public Triangle subtract(Vector3f vector3f) {
@@ -38,12 +48,11 @@ public class Triangle {
         );
     }
 
-    public Triangle multiply(Vector3f vector3f) {
-        // i hate Vector3f, EVERTHING returns AND OVERWRITES if u dont give it a blank destination, why, ew
+    public Triangle multiply(Vec3d vec3d) {
         return new Triangle(
-                pointA.mul(vector3f, new Vector3f()),
-                pointB.mul(vector3f, new Vector3f()),
-                pointC.mul(vector3f, new Vector3f())
+                pointA.mul((float) vec3d.x, (float) vec3d.y, (float) vec3d.z, new Vector3f()),
+                pointB.mul((float) vec3d.x, (float) vec3d.y, (float) vec3d.z, new Vector3f()),
+                pointC.mul((float) vec3d.x, (float) vec3d.y, (float) vec3d.z, new Vector3f())
         );
     }
 }

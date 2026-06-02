@@ -1,5 +1,8 @@
 package com.scale.modelModifier.utils.model;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.internal.LinkedTreeMap;
 import com.scale.modelModifier.Main;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -18,19 +21,22 @@ import java.util.stream.Stream;
 
 // code from an old project i made, slightly modified to have extra swag
 public class ModelParser {
+    public static final Gson gson = new GsonBuilder()
+            .setPrettyPrinting()
+            .enableComplexMapKeySerialization()
+            .create();
+
     public static Model getModel(String entityKey) {
         if (!Main.isModelPresent(entityKey)) return null;
 
         try {
-            // todo: make "helditemoffset.txt" and "scale.txt" a single json
-            Vec3d offsetVec = Vec3d.ZERO;
-            Optional<Resource> heldItemOffset = Main.getEntityResource(entityKey, "helditemoffset.txt");
-            if (heldItemOffset.isPresent()) offsetVec = parseVec3dFromLine(heldItemOffset.get().getReader().readLine());
+            Optional<Resource> dataJson = Main.getEntityResource(entityKey, "config.json");
+            HashMap<String, LinkedTreeMap<String, Double>> config = dataJson.isPresent()
+                    ? gson.fromJson(dataJson.get().getReader(), HashMap.class)
+                    :  new HashMap<>();
 
-            Vec3d scaleVec = new Vec3d(1, 1, 1);
-            Optional<Resource> scale = Main.getEntityResource(entityKey, "scale.txt");
-            if (scale.isPresent()) scaleVec = parseVec3dFromLine(scale.get().getReader().readLine());
-
+            Vec3d scaleVec = parseVec3dFromJson(config.getOrDefault("size", new LinkedTreeMap<>()), new Vec3d(1, 1, 1));
+            Vec3d offsetVec = parseVec3dFromJson(config.getOrDefault("held_item_offset", new LinkedTreeMap<>()), Vec3d.ZERO);
 
             HashMap<String, ArrayList<ModelFace>> modelFaces = getModelFaces(entityKey);
             Vector3f dimensions = getDimensions(modelFaces);
@@ -54,11 +60,11 @@ public class ModelParser {
         }
     }
 
-    private static Vec3d parseVec3dFromLine(String line) {
+    private static Vec3d parseVec3dFromJson(LinkedTreeMap<String, Double> json, Vec3d defaultVec3d) {
         return new Vec3d(
-                Double.parseDouble(line.split(",")[0]),
-                Double.parseDouble(line.split(",")[1]),
-                Double.parseDouble(line.split(",")[2])
+                json.getOrDefault("x", defaultVec3d.x),
+                json.getOrDefault("y", defaultVec3d.y),
+                json.getOrDefault("z", defaultVec3d.z)
         );
     }
 

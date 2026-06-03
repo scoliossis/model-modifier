@@ -8,7 +8,8 @@ I'll write a cool readme later cause i like this project quite a bit
 - Works with minecraft smooth lighting and shading packs
 - Allows you to modify the model of any entity via a texture pack [example packs](https://github.com/scoliossis/model-modifier/tree/master/example-resource-packs)
 - The models are only rendered on real players and not on server bots
-![img_1.png](repo/glowing%20and%20items.png)
+
+![glowing%20and%20items.png](repo/glowing%20and%20items.png)
 
 ### Todo:
 - the demo models are frankly FAR too big, and therefore have quite a hefty fps impact
@@ -17,7 +18,6 @@ I'll write a cool readme later cause i like this project quite a bit
 - it currently hides all armour, think of a smart way to render other armour without looking weird
 - models are drawn using quads with three different vertices, this is SLOWER than using triangles
 - code is far too messy for something so simple
-- shields arent rendered :sob:
 - add extra options to the config json, like force glow/invis
 
 ### Create an issue if you find any bugs or have any suggestions!

@@ -1,8 +1,7 @@
 package com.scale.modelModifier.mixins.modelmodifier.player;
 
-import com.scale.modelModifier.utils.model.LivingEntityInfo;
 import com.scale.modelModifier.Main;
-import com.scale.modelModifier.mixins.modelmodifier.ChildPartMapAccessor;
+import com.scale.modelModifier.utils.model.LivingEntityInfo;
 import com.scale.modelModifier.utils.model.Model;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.OverlayTexture;
@@ -43,7 +42,7 @@ public abstract class HandlePlayerArmMixin <AvatarlikeEntity extends PlayerLikeE
         Main.lastAccessedModel = new LivingEntityInfo(
                 handModel,
                 this.model.getRootPart(),
-                ((ChildPartMapAccessor) (Object)this.model.getRootPart()).getChildren(),
+                Main.getModelPartChildren(this.model.getRootPart()),
                 false,
                 !Main.p().getStackInArm(Arm.RIGHT).isEmpty()
         );

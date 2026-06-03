@@ -23,6 +23,7 @@ import net.minecraft.util.Arm;
 import net.minecraft.util.Identifier;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 // todo: everything is a mess, comments are MISSING its all gone wrong.
@@ -72,11 +73,24 @@ public class Main implements ModInitializer {
         lastAccessedModel = new LivingEntityInfo(
                 OVERWRITTEN_MODELS.get(entityKey),
                 rootPart,
-                rootPart == null ? null : ((ChildPartMapAccessor) (Object)rootPart).getChildren(),
+                getModelPartChildren(rootPart),
                 TargetUtil.isBot(entityRenderState),
                 isHoldingItem
         );
         return model;
+    }
+
+    public static Map<String, ModelPart> getModelPartChildren(ModelPart root) {
+        if (root == null) return null;
+
+        Map<String, ModelPart> children = ((ChildPartMapAccessor) (Object)root).getChildren();
+        for (ModelPart child : children.values().toArray(new ModelPart[0])) {
+            // Thinking about the swinging times and all
+            // I'm gonna tell my children's children what life is all about
+            // And hopefully, they'll have just enough soul to figure it out
+            children.putAll(getModelPartChildren(child));
+        }
+        return children;
     }
 
     public static Model getModel(String entityKey) {

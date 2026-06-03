@@ -1,7 +1,6 @@
 package com.scale.modelModifier.mixins.modelmodifier;
 
 import com.scale.modelModifier.Main;
-import net.fabricmc.fabric.api.client.rendering.v1.FabricModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.state.EntityRenderState;

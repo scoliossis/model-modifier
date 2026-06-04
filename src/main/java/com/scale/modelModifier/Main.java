@@ -15,6 +15,7 @@ import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceManager;
@@ -44,11 +45,8 @@ public class Main implements ModInitializer {
                 && !lastAccessedModel.isBot();
     }
 
-    public static String getModelKey(Class<? extends EntityRenderState> entityRenderState) {
-        return entityRenderState.getSimpleName()
-                .toLowerCase()
-                .replace("renderstate", "")
-                .replace("entity", "");
+    public static String getModelKey(EntityType<?> entityType) {
+        return entityType == null ? null : entityType.getUntranslatedName().toLowerCase();
     }
 
     public static Model getModel(EntityRenderState entityRenderState) {
@@ -57,7 +55,7 @@ public class Main implements ModInitializer {
     public static Model getModel(EntityRenderState entityRenderState, ModelPart rootModel) {
         lastAccessedModel = null;
 
-        String entityKey = getModelKey(entityRenderState.getClass());
+        String entityKey = getModelKey(entityRenderState.entityType);
 
         Model model = TargetUtil.isBot(entityRenderState) ? null : getModel(entityKey);
         if (model == null) return null;

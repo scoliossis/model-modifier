@@ -15,6 +15,7 @@ import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.PlayerLikeEntity;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Identifier;
@@ -31,7 +32,7 @@ public abstract class HandlePlayerArmMixin <AvatarlikeEntity extends PlayerLikeE
 
     @Redirect(method = "renderArm", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;submitModelPart(Lnet/minecraft/client/model/ModelPart;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/RenderLayer;IILnet/minecraft/client/texture/Sprite;)V"))
     private void onRenderArm(OrderedRenderCommandQueue instance, ModelPart modelPart, MatrixStack matrixStack, RenderLayer renderLayer, int light2, int overlay2, Sprite sprite, MatrixStack matrices, OrderedRenderCommandQueue queue, int light, Identifier skinTexture, ModelPart arm, boolean sleeveVisible) {
-        Model handModel = Main.getModel(Main.getModelKey(PlayerEntityRenderState.class));
+        Model handModel = Main.getModel(Main.getModelKey(EntityType.PLAYER));
         Main.lastAccessedModel = null;
 
         if (handModel == null) {

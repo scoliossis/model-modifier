@@ -7,8 +7,8 @@ I'll write a cool readme later cause i like this project quite a bit
 
 
 ## Versions:
-- Fabric 1.21.10 [[Branch]](https://github.com/scoliossis/Model-Modifier/tree/1.21.10) [[Download]](https://github.com/scoliossis/Model-Modifier/releases/tag/1.0)
-- Fabric 1.21.11 [[Branch]](https://github.com/scoliossis/Model-Modifier/tree/1.21.11) [[Download]](https://github.com/scoliossis/Model-Modifier/releases/tag/1.0)
+- Fabric 1.21.10 [[Branch]](https://github.com/scoliossis/Model-Modifier/tree/1.21.10) [[Download]](https://github.com/scoliossis/Model-Modifier/releases/download/1.0/Model-Modifier-1.21.10.jar)
+- Fabric 1.21.11 [[Branch]](https://github.com/scoliossis/Model-Modifier/tree/1.21.11) [[Download]](https://github.com/scoliossis/Model-Modifier/releases/download/1.0/Model-Modifier-1.21.11.jar)
 
 ### Features:
 - Works with all minecraft effects, such as glowing and invisibility

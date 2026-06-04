@@ -6,7 +6,6 @@ I'll write a cool readme later cause i like this project quite a bit
 ### Features:
 - Works with all minecraft effects, such as glowing and invisibility
 - Works with minecraft smooth lighting and shading packs
-- Allows you to modify the model of any entity via a texture pack [example packs](https://github.com/scoliossis/model-modifier/tree/master/example-resource-packs)
 - The models are only rendered on real players and not on server bots
 
 ![glowing%20and%20items.png](repo/glowing%20and%20items.png)

@@ -10,7 +10,6 @@ import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.state.ArmedEntityRenderState;
 import net.minecraft.client.render.item.ItemRenderState;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.Arm;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,7 +30,7 @@ public abstract class MoveHeldItemMixin<S extends ArmedEntityRenderState, M exte
             method = "renderItem",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/item/ItemRenderState;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;III)V")
     )
-    protected void onRenderItem(ItemRenderState instance, MatrixStack matrices, OrderedRenderCommandQueue orderedRenderCommandQueue, int light, int overlay, int i, S entityState, ItemRenderState itemState, ItemStack stack, Arm arm, MatrixStack matrices2, OrderedRenderCommandQueue queue, int light2) {
+    protected void onRenderItem(ItemRenderState instance, MatrixStack matrices, OrderedRenderCommandQueue orderedRenderCommandQueue, int light, int overlay, int i, S entityState, ItemRenderState itemRenderState, Arm arm, MatrixStack matrices2, OrderedRenderCommandQueue orderedRenderCommandQueue2, int light2) {
         Model model = Main.getModel(entityState);
         boolean shouldOverwriteModel = model != null && Main.lastAccessedModel.model() != null;
 
@@ -40,7 +39,7 @@ public abstract class MoveHeldItemMixin<S extends ArmedEntityRenderState, M exte
             matrices.translate(model.heldItemOffset().multiply(arm == Arm.LEFT ? -1 : 1, 1, 1));
         }
 
-        itemState.render(matrices, orderedRenderCommandQueue, light, overlay, i);
+        instance.render(matrices, orderedRenderCommandQueue, light, overlay, i);
 
         if (shouldOverwriteModel) matrices.pop();
     }

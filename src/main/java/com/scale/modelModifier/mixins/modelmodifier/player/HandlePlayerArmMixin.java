@@ -6,7 +6,6 @@ import com.scale.modelModifier.utils.model.Model;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
@@ -35,7 +34,7 @@ public abstract class HandlePlayerArmMixin <AvatarlikeEntity extends PlayerLikeE
         Main.lastAccessedModel = null;
 
         if (handModel == null) {
-            queue.submitModelPart(arm, matrices, RenderLayers.entityTranslucent(skinTexture), light, OverlayTexture.DEFAULT_UV, null);
+            queue.submitModelPart(arm, matrices, RenderLayer.getEntityTranslucent(skinTexture), light, OverlayTexture.DEFAULT_UV, null);
             return;
         }
 
@@ -47,6 +46,6 @@ public abstract class HandlePlayerArmMixin <AvatarlikeEntity extends PlayerLikeE
                 !Main.p().getStackInArm(Arm.RIGHT).isEmpty()
         );
 
-        queue.submitModelPart(arm, matrices, RenderLayers.entityTranslucent(handModel.texture()), light, OverlayTexture.DEFAULT_UV, null);
+        queue.submitModelPart(arm, matrices, RenderLayer.getEntityTranslucent(handModel.texture()), light, OverlayTexture.DEFAULT_UV, null);
     }
 }

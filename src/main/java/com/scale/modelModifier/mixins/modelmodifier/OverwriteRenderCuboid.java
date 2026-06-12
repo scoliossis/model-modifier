@@ -23,7 +23,7 @@ public class OverwriteRenderCuboid {
 
     @Inject(method = "renderCuboids", at = @At("HEAD"), cancellable = true)
     private void onRenderCuboids(MatrixStack.Entry entry, VertexConsumer vertexConsumer, int light, int overlay, int color, CallbackInfo ci) {
-        if (!Main.shouldOverwriteModel()) return;
+        if (!Main.shouldOverwriteModel() || Main.lastAccessedModel.modelPartMap() == null) return;
 
         // maybe a bad way to get the model part name, but it works
         String modelPartName = null;
